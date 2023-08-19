@@ -1,0 +1,755 @@
+npm vs npx
+NPM is a package manager used to install, delete, and update Javascript packages on your machine. NPX is a package executer, and it is used to execute javascript packages directly, without installing them
+rafce - react arrow function
+
+rapid api:
+execiseDB api
+youtube search and download - fetch exercise videos straight from youtube
+npx create-react-app ./ (within an empty folder create)
+index.js - start everything- reactdom.createroot() and root.render()
+rafce - snippet (create react arrow function export component)
+npm start
+
+route, routes to route between pages
+<Route path="/" element={<Home/>} />
+
+mt- margin top
+lg- large devices -> for responsiveness
+xs - extra small devices
+ml- margin left
+sm - small devices
+
+mui/material - ui kit to create great looking webistes
+box, typography
+netlify.com: to deploy react applications  -> using npm run build( optimised production build for our react application)
+
+
+bodypart.js
+
+import React from 'react'
+import { Stack, Typography } from '@mui/material'
+
+import Icon from '../assets/icons/gym.png'
+
+const BodyPart = ({item, setBodyPart, bodyPart}) => {
+  return (
+    <Stack
+        type="button"
+        alignItems="center"
+        justifyContent='center'
+        className='bodyPart-card'
+        sx={{
+            borderTop: bodyPart === item ? '4px solid #ff2625' : '',
+            backgroundColor: '#fff',
+            borderBottomLeftRadius: '20px',
+            width: '270px',
+            height: '280px',
+            cursor: 'pointer',
+            gap: '47px'
+        }}
+        onClick={() => {
+          setBodyPart(item) ;
+          window.scrollTo({top:1800, left:100,behavior:'smooth'})
+        }}
+    >
+        <img src={Icon} alt="dumbbell" style={{
+            width:'40px', height:'40px'
+        }}
+        />
+        <Typography fontSize="24px" fontWeight="bold"
+        color="#3A1212" textTransform="capitalize"
+        >{item} </Typography>
+    </Stack>
+  )
+}
+
+export default BodyPart
+
+
+
+detail.js
+
+import React from 'react'
+import { Typography,Stack,Button } from '@mui/material'
+
+import BodyPartImage from '../assets/icons/body-part.png'
+import TargetImage from '../assets/icons/target.png'
+import EquipmentImage from '../assets/icons/equipment.png'
+
+const Detail = ({exerciseDetail}) => {
+   const {bodyPart, gifUrl, name, target, equipment} = exerciseDetail; 
+
+   const extraDetail = [
+    {
+        icon: BodyPartImage,
+        name: bodyPart,
+    },
+    {
+        icon:TargetImage,
+        name: target,
+    },
+    {
+        icon:EquipmentImage,
+        name: equipment,
+    }
+   ]
+   return (
+    <Stack gap="60px" sx={{flexDirection:{lg:'row'},p:'20px',alignItems:'center'}}>
+        <img src={gifUrl} alt={name} loading='lazy' className='detail-image' />
+        <Stack sx={{gap: {lg:'35px', xs:'20px'}}} >
+            <Typography sx={{ fontSize: { lg: '64px', xs: '30px' } }} fontWeight={700} textTransform="capitalize">
+                {name}
+            </Typography>
+            <Typography>
+            Exercises keep you strong.{' '}
+            <span style={{ textTransform: 'capitalize' }}>{name}</span> bup is one
+            of the best <br /> exercises to target your {target}. It will help you improve your{' '}
+            <br /> mood and gain energy.
+            </Typography>
+            {extraDetail.map((item)=>(
+                <Stack key={item.name} direction="row" gap="24px" alignItems="center">
+                    <Button sx={{background: '#fff2db', borderRadius:'50%',
+                    width:'100px',height:'100px'}}>
+                        <img src={item.icon} alt={bodyPart} style={{width:'50px',
+                        height:'50px'}} />
+                    </Button>
+                    <Typography textTransform="capitalize" variant="h5">
+                        {item.name}
+                    </Typography>
+                </Stack>
+            ))}
+        </Stack>
+    </Stack>
+   )
+    
+}
+export default Detail
+
+
+
+exercisecard.js
+import React from 'react'
+import { Link } from 'react-router-dom'
+import {Button, Stack, Typography} from '@mui/material'
+
+export const ExerciseCard = ({exercise}) => {
+  return (
+    <Link className='exercise-card' to={`/exercise/${exercise.id}`}>
+        <img src={exercise.gifUrl} alt={exercise.name} loading='lazy'/>
+        <Stack direction="row">
+            <Button sx={{ml:'21px', color:'#fff', backgrounf:'#ffa9a9',
+            fontSize: '14px', borderRadius: '20px', textTransform:'capitalize'}}>
+                {exercise.bodyPart}
+            </Button>
+            <Button sx={{ml:'21px', color:'#fff', backgrounf:'#fcc757',
+            fontSize: '14px', borderRadius: '20px', textTransform:'capitalize'}}>
+                {exercise.target}
+            </Button>
+
+        </Stack>
+        <Typography ml="21px" color="#000" fontWeight="bold" mt="11px"
+        pb="10px" textTransform="capitalize" fontSize="24px">
+            {exercise.name}
+        </Typography>
+    </Link>
+  )
+}
+
+
+
+exercises.js
+import React , {useEffect, useState} from 'react'
+import { Pagination } from '@mui/material'
+import {Box, Stack, Typography} from '@mui/material'
+
+import { exerciseOptions ,fetchData } from '../utils/fetchData'
+import ExerciseCard  from './ExerciseCard'
+import Loader from './Loader'
+
+const Exercises = ({ exercises, setExercises, bodyPart }) => {
+  
+  const [currentPage, setCurrentPage]= useState(1);
+  const exercisesPerPage=9 ;
+
+  const indexOfLastExercise= currentPage*exercisesPerPage;
+  const indexOfFirstExercise= indexOfLastExercise - exercisesPerPage ;
+  const currentExercises= exercises.slice(indexOfFirstExercise,indexOfLastExercise);
+
+
+  const paginate=(e, value)=>{
+    setCurrentPage(value);
+
+    window.scrollTo({top:1800, behavior:'smooth'})
+  }
+
+  useEffect(()=>{
+    const fetchExercisesData = async()=>{
+      let exercisesData=[];
+      if(bodyPart==='all'){
+        exercisesData= await fetchData('https://exercisedb.p.rapidapi.com/exercises', exerciseOptions);
+      }
+      else{
+        exercisesData= await fetchData('https://exercisedb.p.rapidapi.com/exercises/bodyPart/${bodyPart}', exerciseOptions);
+      }
+      setExercises(exercisesData);
+    }
+
+    fetchExercisesData();
+  },[bodyPart]);
+
+  return (
+    <Box id="exercises"
+      sx={{mt: {lg:'110px'}}}
+      mt="50px"
+      p="20px"
+    >
+      <Typography variant="h3" mb="46px">
+        Showing Results
+      </Typography>
+      <Stack direction="row" sx= {{gap: {lg:'110px', xs:'50px'}}}
+      flexWrap="wrap" justifyContent="center">
+        {currentExercises.map((exercise, index) => (
+          <ExerciseCard key={index} exercise={exercise} />
+        ))}
+      </Stack>
+      <Stack mt="100px" alignItems="center">
+        {exercises.length>9 && (
+          <Pagination color="standard"
+          shape="rounded"
+          defaultPage={1}
+          count={Math.ceil(exercises.length/9)}
+          page={currentPage}
+          onChange={ paginate}
+          size="large" />
+        )}
+
+      </Stack>
+
+    </Box>
+  )
+}
+
+export default Exercises
+
+
+
+exercisevideos.js
+import React from 'react'
+import {Box, Stack,Typography} from '@mui/material'
+
+
+const ExerciseVideos = ({exerciseVideos,name}) => {
+
+    console.log(exerciseVideos);
+    if(!exerciseVideos.length) return 'Loading...';
+    return (
+        <Box sx={{marginTop:{lg:'200px',xs:'20px'}}} p="20px">
+
+            <Typography variant="h3" mb="33px">
+                Watch <span style={{color:'#ff2625', textTransform:'capitalize'}}>
+                    {name} </span>exercise videos
+            </Typography>
+
+            <Stack justifyContent="flex-start" flexWrap="wrap" alignItems="center"
+            sx={{
+                flexDirection:{lg:'row'},
+                gap:{lg:'110px', xs:'0'}
+            }} >
+                {exerciseVideos?.slice(0,6).map((item,index)=>(
+                    <a 
+                    key={index}
+                    className='exercise-video'
+                    href={`https://www.youtube.com/watch?v=${item.video.videoId}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    >
+                        <img src={item.video.thumbnails[0].url} alt={item.video.title} />
+                        <Box>
+                            <Typography variant='h5' color='#000'>
+                                {item.video.title}
+                            </Typography>
+                            <Typography variant='h6' color='#000'>
+                                {item.video.channelName}
+                            </Typography>
+                        </Box>
+
+                    </a>
+                ))}
+            </Stack>
+
+        </Box>
+    )
+}
+
+export default ExerciseVideos
+
+
+
+footer.js
+import React from 'react'
+import {Box, Stack, Typography} from '@mui/material'
+
+import Logo from '../assets/images/Logo-1.png'
+
+const Footer = () => {
+  return (
+    <Box mt="80px" bgcolor="#fff3f4">
+      <Stack gap="40px" alignItems="center" px="40px" pt="24px">
+        <img src={Logo} alt="logo" width="200px" height="40px" />
+        <Typography variant="h5" pb="40px" mt="20px">
+          Made with Love by Surbs
+        </Typography>
+      </Stack>
+    </Box>
+  )
+}
+
+export default Footer
+
+
+
+herobanner.js
+import React from 'react'
+import { Box, Stack, Typography, Button } from '@mui/material'
+import HeroBannerImage from '../assets/images/banner.png'
+const HeroBanner = () => {
+  return (
+    <Box sx={{
+        mt: {lg: '212px', xs: '70px'},
+        ml: {sm: '50px'}
+    }} position="relative" p="20px">
+        {/* p - padding
+        mt- margin top
+        lg- large devices -> for responsiveness
+        xs - extra small devices
+        ml- margin left
+        sm - small devices */}
+        <Typography color="#FF2625" fontWeight="600" fontSize="26px">
+            Fitness Club
+        </Typography>
+        <Typography fontWeight={700}
+        sx={{ fontSize: {lg:'44px', xs: '40px'}
+        }}
+        mb="23px" mt="30px"
+        >
+            Sweat, Smile <br/> and Repeat
+        </Typography>
+        <Typography fontSize="22px" lineHeight="35px" mb={4}>
+            Check out the most effective exercises
+        </Typography>
+        <Button variant='contained' color="error"
+        href="#exercises"
+        sx={{ backgroundColor: '#ff2625',
+        padding: '10px'}}
+        >Explore Exercises</Button>
+        <Typography fontWeight={600}
+        color="#ff2625"
+        sx={{
+            opacity: 0.1,
+            display: { lg:'block', xs: 'none'}
+        }}
+        fontSize="200px"
+        >
+            Exercise
+        </Typography>
+        <img src={HeroBannerImage} alt="banner"
+        className="hero-banner-img" />
+    </Box>
+  )
+}
+
+export default HeroBanner
+
+
+
+horizontalscrollbar.js
+import React , {useContext} from 'react'
+import { Box , Typography } from '@mui/material'
+import { ScrollMenu, VisibilityContext } from 'react-horizontal-scrolling-menu' ;
+
+import BodyPart from './BodyPart'
+import ExerciseCard from './ExerciseCard'
+
+import RightArrowIcon from '../assets/icons/right-arrow.png'
+import LeftArrowIcon from '../assets/icons/left-arrow.png'
+
+const LeftArrow = () => {
+  const { ScrollPrev } = useContext(VisibilityContext);
+
+  return (
+    <Typography onClick= {()=> ScrollPrev()}
+    className="right-arrow">
+      <img src= {LeftArrowIcon} alt="left-arrow" />
+    </Typography>
+  );
+};
+
+const RightArrow = () => {
+  const { ScrollNext } = useContext(VisibilityContext);
+
+  return (
+    <Typography onClick= {()=> ScrollNext()}
+    className="left-arrow">
+      <img src= {RightArrowIcon} alt="right-arrow" />
+    </Typography>
+  );
+};
+
+
+export const HorizontalScrollbar = ({data, bodyParts, setBodyPart, bodyPart}) => (
+    // <ScrollMenu LeftArrow={LeftArrow} RightArrow={RightArrow}>
+    //     {data.map((item) => (
+    //             <Box
+    //                 key= {item.id || item}
+    //                 itemId= {item.id || item}
+    //                 title= {item.id || item}
+    //                 m="0 40px"
+    //             >
+    //                 {bodyParts ? <BodyPart item={item}  
+    //                 setBodyPart={setBodyPart}
+    //                 bodyPart={bodyPart}
+    //                 />:
+    //                 <ExerciseCard exercise={item}/>}
+
+    //             </Box>
+    //         )
+    //     ))}
+    // </ScrollMenu>
+    <ScrollMenu LeftArrow={LeftArrow} RightArrow={RightArrow}>
+    {data.map((item) => (
+      <Box
+        key={item.id || item}
+        itemId={item.id || item}
+        title={item.id || item}
+        m="0 40px"
+      >
+        {bodyParts ? <BodyPart item={item} setBodyPart={setBodyPart} bodyPart={bodyPart} /> : <ExerciseCard exercise={item} /> }
+      </Box>
+    ))}
+  </ScrollMenu>
+  );
+
+
+loader.js
+import React from 'react'
+import {Stack} from '@mui/material'
+import InfinitySpin from 'react-loader-spinner'
+
+const Loader = () => {
+  return (
+    <Stack direction="row" justifyContent="center" alignItems="center" width="100%">
+        <InfinitySpin color="gray"/>
+    </Stack>
+  )
+}
+
+export default Loader
+
+
+navbar.js
+import React from 'react'
+import { Link } from 'react-router-dom';
+import { Stack } from '@mui/material';
+
+import Logo from '../assets/images/Logo.png';
+
+const Navbar = () => {
+  return (
+    <Stack direction="row"
+    justifyContent="space-around" sx={{gap: {
+      sm: '122px', xs:'40px'}, mt: {sm: '32px', xs:'20px'}, justifyContent: 'none'
+    }} px="20px">
+      <Link to="/">
+        <img src={Logo} alt ="logo" style={{width: '48px', height:'48px', margin: '0 20px'}} />
+      </Link>
+      <Stack
+        direction="row"
+        gap="40px"
+        fontSize="24px"
+        alignItems="flex-end"
+      >
+        <Link to="/" style= {{textDecoration:'none', color: "#3A1212", borderBottom: '3px solid #FF2625'}}>
+          Home
+        </Link>
+        <a href= "#exercises" style={{
+          textDecoration: 'none', color: '#3A1212'
+        }}>Exercises</a>
+      </Stack>
+    </Stack>
+  )
+}
+
+export default Navbar
+
+
+searchexercise.js
+import React, { useEffect, useState } from 'react'
+import { Box, Button, Stack, TextField, Typography } from '@mui/material'
+
+import { exerciseOptions, fetchData } from '../utils/fetchData';
+import  HorizontalScrollbar  from './HorizontalScrollbar';
+
+const SearchExercises = ({setExercises, bodyPart, setBodyPart}) => {
+  const [search, setSearch]= useState('')
+  const [bodyParts, setBodyParts]= useState([]);
+
+  useEffect(() => {
+    const fetchExercisesData = async()=> {
+      const bodyPartsData = await fetchData('https://exercisedb.p.rapidapi.com/exercises/bodyPartList', exerciseOptions);
+
+      setBodyParts(['all', ...bodyPartsData]);
+    }
+    fetchExercisesData();
+  }, [])
+
+  // const handleSearch = async () => {
+  //   if(search){
+  //     const exercisesData =  await fetchData
+  //     ('https://exercisedb.p.rapidapi.com/exercises', exerciseOptions);
+
+  //     const searchedExercises =  exercisesData.filter(
+  //       (exercise) => exercise.name.toLowerCase().includes(search)
+  //       || exercise.target.toLowerCase().includes(search)
+  //       || exercise.equipment.toLowerCase().includes(search)
+  //       || exercise.bodyPart.toLowerCase().includes(search)
+  //     );
+
+  //     setSearch('');
+  //     setExercises(searchedExercises);
+  //     // console.log(exercisesData);
+  //   }
+  // }
+
+  const handleSearch = async () => {
+    if (search) {
+      const exercisesData = await fetchData('https://exercisedb.p.rapidapi.com/exercises', exerciseOptions);
+
+      const searchedExercises = exercisesData.filter(
+        (item) => item.name.toLowerCase().includes(search)
+               || item.target.toLowerCase().includes(search)
+               || item.equipment.toLowerCase().includes(search)
+               || item.bodyPart.toLowerCase().includes(search),
+      );
+
+      window.scrollTo({ top: 1800, left: 100, behavior: 'smooth' });
+
+      setSearch('');
+      setExercises(searchedExercises);
+    }
+  };
+
+  return (
+    <Stack alignItems="center" mt="37px" justifyContent="center" p="20px">
+      <Typography fontWeight={700} sx={{
+        fontSize: {lg: '44px', xs:'30px'}
+      }} mb="50px" textAlign="center">
+        Awesome Exercises You <br/>
+        Should Know
+      </Typography>
+      <Box position="relative" mb="72px">
+        <TextField
+        sx={{
+          input: {
+            fontWeight: '700',
+            border: 'none',
+            borderRadius: '4px'
+          },
+          width: {lg: '800px', xs: '350px'},
+          backgroundColor: '#fff',
+          borderRadius: '40px'
+        }}
+          height="76px"
+          value={search}
+          onChange={(e)=> setSearch(e.target.value.toLowerCase())}
+          placeholder='Search Exercises'
+          type="text"
+        />
+
+        <Button className='search-btn'
+          sx={{
+            bgcolor: '#FF2625',
+            color: '#fff',
+            textTransform: 'none',
+            width: {lg: '175px',xs: '80px'},
+            fontSize: {lg:'20px', xs: '14px'},
+            height: '56px',
+            position:"absolute",
+            right:'0'
+          }}
+          onClick={handleSearch}
+          >
+          Search
+        </Button>
+
+      </Box>
+
+      <Box sx={{position: 'relative', width:'100%',p:'20px'}}>
+        <HorizontalScrollbar data={bodyParts}
+        bodyPart={bodyPart} 
+        setBodyPart= {setBodyPart} isBodyParts/>
+      </Box>
+
+    </Stack>
+  )
+}
+
+export default SearchExercises
+
+
+
+similarexercise.js
+// import React from 'react'
+// import {Box, Stack, Typography} from '@mui/material'
+
+// import HorizontalScrollbar from './HorizontalScrollbar'
+// import Loader from './Loader'
+
+// const SimilarExercises = (targetMuscleExercises, equipmentExercises) => {
+//   return (
+//     <Box sx={{mt: {lg: '100px',xs:'0'}}}>
+//       <Typography variant="h3" mb={5}>
+//         Exercises that target the same equipment
+//       </Typography>
+//       <Stack direction="row" sx={{p:'2',position:'relative'}}>
+//         {equipmentExercises.length ? 
+//         <HorizontalScrollbar data = {targetMuscleExercises}/>
+//         : <Loader/>}
+//       </Stack>
+//     </Box>
+//   )
+// }
+
+// export default SimilarExercises
+
+
+import React from 'react';
+import { Typography, Box, Stack } from '@mui/material';
+
+import HorizontalScrollbar from './HorizontalScrollbar';
+import Loader from './Loader';
+
+const SimilarExercises = ({ targetMuscleExercises, equipmentExercises }) => (
+  <Box sx={{ mt: { lg: '100px', xs: '0px' } }}>
+    <Typography sx={{ fontSize: { lg: '44px', xs: '25px' }, ml: '20px' }} fontWeight={700} color="#000" mb="33px">
+      Similar <span style={{ color: '#FF2625', textTransform: 'capitalize' }}>Target Muscle</span> exercises
+    </Typography>
+    <Stack direction="row" sx={{ p: 2, position: 'relative' }}>
+      {targetMuscleExercises.length !== 0 ? <HorizontalScrollbar data={targetMuscleExercises} /> : <Loader />}
+    </Stack>
+    <Typography sx={{ fontSize: { lg: '44px', xs: '25px' }, ml: '20px', mt: { lg: '100px', xs: '60px' } }} fontWeight={700} color="#000" mb="33px">
+      Similar <span style={{ color: '#FF2625', textTransform: 'capitalize' }}>Equipment</span> exercises
+    </Typography>
+    <Stack direction="row" sx={{ p: 2, position: 'relative' }}>
+      {equipmentExercises.length !== 0 ? <HorizontalScrollbar data={equipmentExercises} /> : <Loader />}
+    </Stack>
+  </Box>
+);
+
+export default SimilarExercises;
+
+
+
+exercisedetail.js
+import React, {useState, useEffect} from 'react'
+import { useParams } from 'react-router-dom'
+import { Box } from '@mui/material'
+
+import { exerciseOptions, fetchData, youtubeOptions } from '../utils/fetchData'
+import Detail from '../components/Detail'
+import ExerciseVideos from '../components/ExerciseVideos'
+import SimilarExercises from '../components/SimilarExercises'
+
+const ExerciseDetail = () => {
+
+  const [exerciseDetail, setExerciseDetail]= useState({});
+  const [exerciseVideos, setExerciseVideos]= useState([]);
+  const [targetMuscleExercises,setTargetMuscleExercises]= useState({});
+  const [equipmentExercises,setEquipmentExercises]= useState({});
+
+  const {id}=useParams();
+
+  useEffect(()=>{
+    const fetchExercisesData= async()=>{
+      const exerciseDbUrl='https://exercisedb.p.rapidapi.com';
+      const youtubeSearchUrl='https://youtube-search-and-download.p.rapidapi.com';
+
+      const exerciseDetailData= await fetchData(`${exerciseDbUrl}/exercises/exercise/${id}`,
+      exerciseOptions);
+      setExerciseDetail(exerciseDetailData);
+
+      const exerciseVideosData= await fetchData(`${youtubeSearchUrl}/search?query=$
+      {exerciseDetailData.name}`, youtubeOptions);
+      setExerciseVideos(exerciseVideosData.contents)
+
+      const targetMuscleExercisesData= await fetchData(`${exerciseDbUrl}/exercises/
+      target/${exerciseDetailData.target}`, exerciseOptions);
+      setTargetMuscleExercises(targetMuscleExercisesData);
+
+      const equipmentExercisesData= await fetchData(`${exerciseDbUrl}/exercises/
+      equipment/${exerciseDetailData.equipment}`, exerciseOptions);
+      setEquipmentExercises(equipmentExercisesData);
+
+    }
+    fetchExercisesData();
+  }, [id]);
+
+  return (
+    <Box>
+      <Detail exerciseDetail={exerciseDetail}/>
+      <ExerciseVideos exerciseVideos={exerciseVideos} name={exerciseDetail.name}/>
+      <SimilarExercises targetMuscleExercises={targetMuscleExercises} 
+      equipmentExercises={equipmentExercises} />
+    </Box>
+  )
+}
+
+export default ExerciseDetail
+
+
+
+
+home.js
+
+import React, { useState } from 'react'
+import { Box } from '@mui/material'
+
+import Exercises from '../components/Exercises'
+import SearchExercises from '../components/SearchExercises'
+import HeroBanner from '../components/HeroBanner'
+
+
+const Home = () => {
+  const [bodyPart, setBodyPart]= useState('all');
+  const [exercises, setExercises] = useState([]);
+
+  console.log(bodyPart);
+
+  return (
+    <Box>
+      <HeroBanner/>
+      <SearchExercises 
+        setExercises={setExercises}
+        bodyPart={bodyPart} 
+        setBodyPart={setBodyPart}/>
+      <Exercises
+        exercises={exercises}
+        setExercises={setExercises}
+        bodyPart={bodyPart} 
+      />
+    </Box>
+  )
+}
+
+export default Home
+
+let obja={
+  r:34,
+  m:45,
+  func: function myfunc(num) {
+    console.log(num) ;
+  }
+}
+document.addEventListener("click", function click() {
+  console.log("clicked"); 
+})
+
